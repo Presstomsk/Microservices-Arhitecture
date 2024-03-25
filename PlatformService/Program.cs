@@ -6,6 +6,7 @@ namespace PlatformService
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using PlatformService.Data;
+    using PlatformService.SyncDataServices.Http;
 
     public static class Program
     {
@@ -20,7 +21,12 @@ namespace PlatformService
             );
             builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
             builder.Services.AddSwaggerGen();
+
+            Console.WriteLine(
+                $"--> CommandService Endpoint {builder.Configuration["CommandService"]}"
+            );
 
             var app = builder.Build();
 
