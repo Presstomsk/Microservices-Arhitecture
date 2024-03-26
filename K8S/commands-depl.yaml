@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: platforms-depl
+  name: commands-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: platformservice
+      app: commandsservice
   template:
     metadata:
       labels:
-        app: platformservice
+        app: commandsservice
     spec:
       automountServiceAccountToken: false
       containers:
-      - name: platformservice
-        image: presstomsk/platformservice:latest
+      - name: commandsservice
+        image: presstomsk/commandsservice:latest
         resources:
           limits:
             memory: "128Mi"
@@ -26,13 +26,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: platforms-clusterip-srv
+  name: commands-clusterip-srv
 spec:
   type: ClusterIP
   selector:
-    app: platformservice
+    app: commandsservice
   ports:
-  - name: platformservice
+  - name: commandsservice
     protocol: TCP
     port: 8080
     targetPort: 8080
