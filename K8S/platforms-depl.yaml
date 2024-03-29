@@ -15,11 +15,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: platformservice
-        image: presstomsk/platformservice:latest
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
+        image: presstomsk/platformservice:latest        
         ports:
         - containerPort: 8080
 ---
