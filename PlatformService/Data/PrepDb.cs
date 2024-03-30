@@ -3,6 +3,7 @@ namespace PlatformService.Data
     using System;
     using System.Linq;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using PlatformService.Models;
 
@@ -10,19 +11,33 @@ namespace PlatformService.Data
     {
         #region Methods
 
-        public static void PrepPopulation(IApplicationBuilder app)
+        public static void PrepPopulation(IApplicationBuilder app, bool isProd)
         {
             using (var serviceScope = app.ApplicationServices.CreateScope())
             {
-                SeeData(serviceScope.ServiceProvider.GetService<AppDbContext>());
+                SeeData(serviceScope.ServiceProvider.GetService<AppDbContext>(), isProd);
             }
         }
 
-        private static void SeeData(AppDbContext? context)
+        private static void SeeData(AppDbContext? context, bool isProd)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
+            }
+
+            if (isProd)
+            {
+                Console.WriteLine("--> Attempting to apply migrations...");
+
+                try
+                {
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"---> Could not run migrations: {ex.Message}");
+                }
             }
 
             if (!context.Platforms.Any())

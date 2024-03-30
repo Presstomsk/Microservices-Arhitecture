@@ -3,6 +3,7 @@ namespace PlatformService
     using System;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using PlatformService.Data;
@@ -15,10 +16,24 @@ namespace PlatformService
         private static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            if (builder.Environment.IsProduction())
+            {
+                Console.WriteLine("--> Using MSSQL Server Db");
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformConn"))
+                );
+            }
+            else
+            {
+                Console.WriteLine("--> Using InMem Db");
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseInMemoryDatabase("InMemory")
+                );
+            }
+
             builder.Services.AddControllers();
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseInMemoryDatabase("InMemory")
-            );
+
             builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
@@ -30,7 +45,7 @@ namespace PlatformService
 
             var app = builder.Build();
 
-            PrepDb.PrepPopulation(app);
+            PrepDb.PrepPopulation(app, builder.Environment.IsProduction());
 
             if (app.Environment.IsDevelopment())
             {
